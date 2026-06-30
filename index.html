@@ -11,10 +11,13 @@
   import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ─── FIREBASE CONFIG — ⚠️ ENTORNO DE PRUEBAS (TEST) ──────────────
-  // Este archivo apunta al proyecto quiniela-rodriguez-test,
-  // separado por completo de la base real (quiniela-rodriguez-2026).
-  // Úsalo libremente para probar cambios sin afectar el juego real.
+  // ─── FIREBASE CONFIG ────────────────────────────────────────────
+  // INSTRUCCIONES PARA MAURICIO:
+  // 1. Ve a https://console.firebase.google.com
+  // 2. Crea proyecto "quiniela-rodriguez-2026"
+  // 3. Firestore Database → Crear en modo prueba
+  // 4. Configuración del proyecto → Agregar app web
+  // 5. Copia tu firebaseConfig y pégalo aquí abajo:
   const firebaseConfig = {
     apiKey: "AIzaSyB2uTjQVzhN1QWJV9D3bwJ_VQQvVsE6BdU",
     authDomain: "quiniela-rodriguez-test.firebaseapp.com",
@@ -230,6 +233,9 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 .partido-dt{font-size:10px;color:var(--gris);margin-bottom:5px;letter-spacing:.3px}
 .partido-grupo.locked{opacity:.65;background:rgba(244,67,54,.04)}
 .partido-grupo.locked .score-input{background:#0a0a0a;color:#444;cursor:not-allowed;border-color:#1a1a1a}
+.partido-card.locked{opacity:.65;background:rgba(244,67,54,.04);border-color:rgba(244,67,54,.25)!important}
+.partido-card.locked .score-input{background:#0a0a0a;color:#444;cursor:not-allowed;border-color:#1a1a1a}
+.partido-card.locked .select-equipo{opacity:.5;cursor:not-allowed}
 .resultado-badge{display:inline-block;margin-top:4px;font-size:9px;font-weight:700;
   padding:2px 6px;border-radius:3px;letter-spacing:.5px;text-transform:uppercase}
 .badge-local{background:rgba(0,200,83,.15);color:var(--verde)}
@@ -402,6 +408,36 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 .bracket-set{color:var(--verde)}
 .bracket-unset{color:var(--gris)}
 
+/* ── BRACKET VISUAL DINÁMICO ── */
+.bv-wrap{overflow-x:auto;padding-bottom:8px}
+.bv-header{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--dorado);letter-spacing:1px;margin-bottom:4px}
+.bv-sub{font-size:11px;color:var(--gris);margin-bottom:16px}
+.bv-groups{display:flex;flex-direction:column;gap:24px}
+.bv-group-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.bv-group-label.g1{color:#448aff}
+.bv-group-label.g2{color:var(--verde)}
+.bv-rondas{display:flex;gap:14px;min-width:max-content}
+.bv-ronda-col{display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-width:168px}
+.bv-ronda-title{font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;
+  text-align:center;margin-bottom:4px;font-weight:700}
+.bv-match{background:var(--panel);border:1px solid var(--borde);border-radius:7px;
+  padding:6px 8px;font-size:11px;transition:all .25s}
+.bv-match.bv-done{border-color:rgba(0,200,83,.3)}
+.bv-team{display:flex;align-items:center;gap:6px;padding:3px 2px;border-radius:4px;transition:all .25s}
+.bv-team.bv-winner{background:rgba(0,200,83,.12);font-weight:700}
+.bv-team.bv-loser{opacity:.4;text-decoration:line-through}
+.bv-team.bv-tbd{opacity:.35;font-style:italic}
+.bv-flag{font-size:14px;flex-shrink:0}
+.bv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px}
+.bv-score{font-size:10px;color:var(--gris);font-weight:700;flex-shrink:0}
+.bv-dt{font-size:8px;color:var(--gris);text-align:center;margin-top:3px}
+.bv-final-col{display:flex;flex-direction:column;justify-content:center;gap:16px;min-width:180px}
+.bv-champion{text-align:center;padding:16px;background:rgba(255,214,0,.06);
+  border:1px solid rgba(255,214,0,.3);border-radius:10px}
+.bv-champion-flag{font-size:40px;margin-bottom:6px}
+.bv-champion-name{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--dorado);letter-spacing:1px}
+
 /* ── ADMIN TABS ── */
 .admin-tabs{display:flex;gap:0;border-bottom:1px solid var(--borde);margin-bottom:20px}
 .admin-tab{padding:10px 18px;font-size:12px;font-weight:600;color:var(--gris);cursor:pointer;
@@ -462,7 +498,7 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 </head>
 <body>
 
-<!-- ⚠️ BANNER DE ENTORNO DE PRUEBAS — visible siempre para no confundir con producción -->
+<!-- ⚠️ BANNER DE ENTORNO DE PRUEBAS -->
 <div style="background:#ff9800;color:#000;text-align:center;padding:8px 12px;font-weight:800;
   font-size:13px;letter-spacing:.5px;font-family:'Inter',sans-serif;position:sticky;top:0;z-index:9999">
   🧪 ENTORNO DE PRUEBAS — los datos aquí NO afectan la quiniela real
@@ -494,6 +530,7 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 <!-- ═══════════════════════════════ TABS ═══════════════════════════════ -->
 <div class="tabs">
   <div class="tab active"  onclick="showTab('hoy')">📅 Hoy</div>
+  <div class="tab"         onclick="showTab('bracket')">📊 Bracket</div>
   <div class="tab"         onclick="showTab('grupos')">⚽ Grupos</div>
   <div class="tab"         onclick="showTab('dieciseisavos')">Dieciseisavos</div>
   <div class="tab"         onclick="showTab('octavos')">Octavos</div>
@@ -512,6 +549,11 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 <!-- HOY -->
 <div id="section-hoy">
   <div id="hoyContent"></div>
+</div>
+
+<!-- BRACKET VISUAL DINÁMICO -->
+<div id="section-bracket" class="section-hidden">
+  <div id="bracketVisualContent"></div>
 </div>
 
 <!-- PODIO PUBLICO -->
@@ -916,18 +958,129 @@ async function cargarDesdeNube(silent=false){
 // ══════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// BRACKET VISUAL DINÁMICO — vista pública entre Hoy y Grupos
+// Muestra el camino completo del torneo, resalta ganadores
+// conforme se actualizan los resultados reales en Admin.
+// ══════════════════════════════════════════════════════
+function bvGetReal(prefix, idx) {
+  return resultadosReales[`${prefix}_${idx}`] || null;
+}
+
+function bvWinnerInfo(prefix, idx, teamA, teamB) {
+  const real = bvGetReal(prefix, idx);
+  if (!real) return { done:false, winner:null };
+  const gL = parseInt(real.gL ?? ''), gV = parseInt(real.gV ?? '');
+  if (isNaN(gL) || isNaN(gV)) return { done:false, winner:null };
+  let winner = null;
+  if (gL !== gV) winner = gL > gV ? teamA : teamB;
+  else if (real.ganador) winner = real.ganador;
+  return { done: !!winner, winner, gL, gV, isTie: gL===gV };
+}
+
+function bvTeamRow(nombre, isWinner, isLoser) {
+  if (!nombre) return `<div class="bv-team bv-tbd"><span class="bv-flag">🌍</span><span class="bv-name">Por definir</span></div>`;
+  const cls = isWinner ? ' bv-winner' : (isLoser ? ' bv-loser' : '');
+  return `<div class="bv-team${cls}"><span class="bv-flag">${flagFor(nombre)}</span><span class="bv-name">${nombre}</span></div>`;
+}
+
+function bvMatchCard(prefix, idx, partido) {
+  const tA = partido?.a || null, tB = partido?.b || null;
+  const info = bvWinnerInfo(prefix, idx, tA, tB);
+  const dtLabel = partido?.dt ? fmtDT(partido.dt) : '';
+  const scoreLabel = info.done && info.gL !== undefined
+    ? `<div class="bv-dt" style="color:var(--verde);font-weight:700">${info.gL} - ${info.gV}${info.isTie?' (pen.)':''}</div>`
+    : (dtLabel ? `<div class="bv-dt">${dtLabel}</div>` : '');
+  return `<div class="bv-match${info.done?' bv-done':''}">
+    ${bvTeamRow(tA, info.winner===tA, info.done && info.winner!==tA)}
+    ${bvTeamRow(tB, info.winner===tB, info.done && info.winner!==tB)}
+    ${scoreLabel}
+  </div>`;
+}
+
+function renderBracketVisual() {
+  const div = document.getElementById('bracketVisualContent');
+  if (!div) return;
+  try {
+    let html = `<div class="bv-wrap">
+      <div class="bv-header">📊 Camino al Título</div>
+      <div class="bv-sub">Vista completa del bracket — se actualiza automáticamente conforme avanza el torneo</div>
+      <div class="bv-groups">`;
+
+    [1, 2].forEach(grupoNum => {
+      const r32idx = BRACKET.r32.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
+      const r16idx = BRACKET.r16.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
+      const qfidx  = BRACKET.qf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
+      const sfidx  = BRACKET.sf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
+
+      html += `<div>
+        <div class="bv-group-label g${grupoNum}">${grupoNum===1?'🔵':'🟢'} Grupo ${grupoNum}</div>
+        <div class="bv-rondas">
+          <div class="bv-ronda-col">
+            <div class="bv-ronda-title">Dieciseisavos</div>
+            ${r32idx.map(i => bvMatchCard('r32', i, BRACKET.r32[i])).join('')}
+          </div>
+          <div class="bv-ronda-col">
+            <div class="bv-ronda-title">Octavos</div>
+            ${r16idx.map(i => bvMatchCard('r16', i, BRACKET.r16[i])).join('')}
+          </div>
+          <div class="bv-ronda-col">
+            <div class="bv-ronda-title">Cuartos</div>
+            ${qfidx.map(i => bvMatchCard('qf', i, BRACKET.qf[i])).join('')}
+          </div>
+          <div class="bv-ronda-col">
+            <div class="bv-ronda-title">Semifinal</div>
+            ${sfidx.map(i => bvMatchCard('sf', i, BRACKET.sf[i])).join('')}
+          </div>
+        </div>
+      </div>`;
+    });
+
+    // Final y 3er lugar
+    const finInfo1 = bvWinnerInfo('fin', 1, BRACKET.final[1]?.a, BRACKET.final[1]?.b);
+    const campeonHTML = finInfo1.done
+      ? `<div class="bv-champion">
+          <div class="bv-champion-flag">${flagFor(finInfo1.winner)}</div>
+          <div class="bv-champion-name">🏆 ${finInfo1.winner}</div>
+        </div>`
+      : '';
+
+    html += `<div>
+      <div class="bv-group-label" style="color:var(--dorado)">🏆 Fase Final</div>
+      <div class="bv-rondas">
+        <div class="bv-ronda-col">
+          <div class="bv-ronda-title">3er y 4to Lugar</div>
+          ${bvMatchCard('fin', 0, BRACKET.final[0])}
+        </div>
+        <div class="bv-ronda-col">
+          <div class="bv-ronda-title">Gran Final</div>
+          ${bvMatchCard('fin', 1, BRACKET.final[1])}
+        </div>
+        ${campeonHTML ? `<div class="bv-final-col">${campeonHTML}</div>` : ''}
+      </div>
+    </div>`;
+
+    html += '</div></div>';
+    div.innerHTML = html;
+  } catch(e) {
+    div.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><p>Error cargando el bracket.<br>${e.message}</p></div>`;
+    console.error('renderBracketVisual error:', e);
+  }
+}
+
 function showTab(tab){
-  ['hoy','grupos','dieciseisavos','octavos','cuartos','semis','final','podio','admin'].forEach(t=>{
+  ['hoy','bracket','grupos','dieciseisavos','octavos','cuartos','semis','final','podio','admin'].forEach(t=>{
     document.getElementById('section-'+t).classList.toggle('section-hidden', t!==tab);
   });
   document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.classList.toggle('active',['hoy','grupos','dieciseisavos','octavos','cuartos','semis','final','podio','admin'][i]===tab);
+    el.classList.toggle('active',['hoy','bracket','grupos','dieciseisavos','octavos','cuartos','semis','final','podio','admin'][i]===tab);
   });
   if(tab==='admin' && document.getElementById('adminPanel').classList.contains('section-hidden')===false){
     adminCargar();
   }
   if(tab==='hoy') renderHoy();
   if(tab==='podio') renderPodioPublico();
+  if(tab==='bracket') renderBracketVisual();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1235,7 +1388,7 @@ function renderRondaElim(gridId, partidos, prefix) {
       color:${p.g===1?'#448aff':'var(--verde)'}">Grupo ${p.g}</span>` : '';
 
     const card = document.createElement('div');
-    card.className = 'partido-card';
+    card.className = 'partido-card' + (locked ? ' locked' : '');
     card.style.borderColor = p.g ? (p.g===1 ? 'rgba(68,138,255,.2)' : 'rgba(0,200,83,.15)') : '';
 
     card.innerHTML = `
@@ -1983,13 +2136,21 @@ function renderResultadosAdmin() {
 
   rondas.forEach(r => {
     html += `<div class="real-grupo"><div class="real-grupo-title">${r.label}</div>`;
-    for (let i = 0; i < r.n; i++) {
+    const rondaBRACKET = {r32:BRACKET.r32,r16:BRACKET.r16,qf:BRACKET.qf,sf:BRACKET.sf,fin:BRACKET.final};
+    // Ordenar por fecha cronológica real, conservando el índice original (i) para las keys
+    const ordenIndices = Array.from({length: r.n}, (_, i) => i)
+      .sort((a, b) => {
+        const dtA = rondaBRACKET[r.prefix]?.[a]?.dt || '9999';
+        const dtB = rondaBRACKET[r.prefix]?.[b]?.dt || '9999';
+        return dtA.localeCompare(dtB);
+      });
+    ordenIndices.forEach(i => {
       const key = `${r.prefix}_${i}`;
       const real = resultadosReales[key] || {};
-      const rondaBRACKET = {r32:BRACKET.r32,r16:BRACKET.r16,qf:BRACKET.qf,sf:BRACKET.sf,fin:BRACKET.final};
       const bPartido = rondaBRACKET[r.prefix]?.[i];
       const tA = bPartido?.a || '';
       const tB = bPartido?.b || '';
+      const dtAdmin = bPartido?.dt ? fmtDT(bPartido.dt) : '';
       const labelTeams = tA && tB
         ? `${flagFor(tA)} ${tA} vs ${tB} ${flagFor(tB)}`
         : `Partido ${i+1}`;
@@ -2000,15 +2161,19 @@ function renderResultadosAdmin() {
       const penOptsAdmin = `<option value="">— ¿Quién gana? —</option>` +
         [tA, tB].filter(Boolean).map(e => `<option value="${e}">${flagFor(e)} ${e}</option>`).join('');
       html += `<div class="real-partido" style="flex-wrap:wrap;gap:6px" id="rp_${key}">
-        <span style="font-size:11px;color:var(--gris);width:100%">${labelTeams}</span>
+        <span style="font-size:11px;color:var(--gris);width:100%">
+          ${labelTeams}${dtAdmin?` <span style="color:var(--dorado);font-weight:600">· ${dtAdmin}</span>`:''}
+        </span>
         <div class="real-score-box">
           <input class="real-score-input" type="number" min="0" max="20"
             value="${vL}" placeholder="–"
-            oninput="setResultadoRealElim('${key}','gL',this.value,'${tA}','${tB}')">
+            oninput="setResultadoRealElim('${key}','gL',this.value,'${tA}','${tB}')"
+            style="border-color:${vL!==''?'var(--dorado)':'var(--borde)'}">
           <span style="color:var(--gris);font-size:13px;font-weight:700">:</span>
           <input class="real-score-input" type="number" min="0" max="20"
             value="${vV}" placeholder="–"
-            oninput="setResultadoRealElim('${key}','gV',this.value,'${tA}','${tB}')">
+            oninput="setResultadoRealElim('${key}','gV',this.value,'${tA}','${tB}')"
+            style="border-color:${vV!==''?'var(--dorado)':'var(--borde)'}">
         </div>
         <div id="pen_admin_${key}" style="${isTie?'':'display:none'};display:flex;align-items:center;gap:5px;flex:1 1 100%">
           <span style="font-size:10px;color:var(--dorado);font-weight:700">🥅 Penales:</span>
@@ -2017,7 +2182,7 @@ function renderResultadosAdmin() {
         </div>
         <span class="real-saved" id="saved_${key}">✅</span>
       </div>`;
-    }
+    });
     html += '</div>';
   });
 
@@ -2043,6 +2208,15 @@ function renderResultadosAdmin() {
 // setResultadoReal para eliminatorias — muestra/oculta penales dinámicamente
 function setResultadoRealElim(key, field, val, tA, tB) {
   setResultadoReal(key, field, val);
+
+  // Marco dorado inmediato en el input que se acaba de llenar (igual que en Grupos)
+  const row = document.getElementById(`rp_${key}`);
+  if (row) {
+    const inputs = row.querySelectorAll('.real-score-input');
+    if (inputs[0]) inputs[0].style.borderColor = (resultadosReales[key]?.gL ?? '') !== '' ? 'var(--dorado)' : 'var(--borde)';
+    if (inputs[1]) inputs[1].style.borderColor = (resultadosReales[key]?.gV ?? '') !== '' ? 'var(--dorado)' : 'var(--borde)';
+  }
+
   // Check if tie after updating
   const real = resultadosReales[key] || {};
   const vL = field === 'gL' ? val : (real.gL ?? '');
@@ -2215,6 +2389,7 @@ async function propagarBracket() {
     };
     if (window._fb?.guardarBracket) await window._fb.guardarBracket(bracketData);
     renderEliminatorias();
+    if (typeof renderBracketVisual === 'function') renderBracketVisual();
     if (changed) showToast('⚽ Bracket actualizado');
   } catch(e) {
     console.error('Error guardando bracket:', e);
