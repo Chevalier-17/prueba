@@ -408,36 +408,63 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 .bracket-set{color:var(--verde)}
 .bracket-unset{color:var(--gris)}
 
-/* ── BRACKET VISUAL DINÁMICO ── */
-.bv-wrap{overflow-x:auto;padding-bottom:8px}
-.bv-header{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--dorado);letter-spacing:1px;margin-bottom:4px}
-.bv-sub{font-size:11px;color:var(--gris);margin-bottom:16px}
-.bv-groups{display:flex;flex-direction:column;gap:28px}
+/* ── DUELOS / BRACKET VISUAL ── */
+.bv-wrap{overflow-x:auto;padding:0 0 16px;-webkit-overflow-scrolling:touch}
+.bv-header{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--dorado);letter-spacing:1px;margin-bottom:2px}
+.bv-sub{font-size:11px;color:var(--gris);margin-bottom:20px}
+.bv-groups{display:flex;flex-direction:column;gap:32px}
 .bv-group-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
-  margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .bv-group-label.g1{color:#448aff}
 .bv-group-label.g2{color:var(--verde)}
-.bv-rondas{display:flex;gap:14px;min-width:max-content}
-.bv-ronda-col{display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-width:168px}
-.bv-ronda-col-grid{min-width:168px;align-content:start}
-.bv-ronda-title{font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;
-  text-align:center;margin-bottom:4px;font-weight:700;align-self:center}
+
+/* Grid del bracket — 1 fila base = ~22px, 8 partidos r32 × 4 filas c/u = 32 filas */
+.bv-grid{display:grid;grid-template-columns:175px 24px 175px 24px 175px 24px 175px;
+  grid-template-rows:repeat(32,20px);column-gap:0;min-width:max-content}
+.bv-col-title{font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;
+  font-weight:700;text-align:center;align-self:end;padding-bottom:6px;grid-row:1}
+
+/* Cajas de partido */
 .bv-match{background:var(--panel);border:1px solid var(--borde);border-radius:7px;
-  padding:6px 8px;font-size:11px;transition:all .25s;align-self:center}
-.bv-match.bv-done{border-color:rgba(0,200,83,.3)}
-.bv-team{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:4px;transition:all .25s}
-.bv-team.bv-winner{background:rgba(0,200,83,.14);font-weight:700;box-shadow:0 0 0 1px rgba(0,200,83,.25) inset}
-.bv-team.bv-loser{opacity:.32;filter:grayscale(60%)}
-.bv-team.bv-tbd{opacity:.3;font-style:italic}
-.bv-flag{font-size:14px;flex-shrink:0}
-.bv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px}
-.bv-score{font-size:10px;color:var(--gris);font-weight:700;flex-shrink:0}
-.bv-dt{font-size:8px;color:var(--gris);text-align:center;margin-top:3px}
-.bv-final-col{display:flex;flex-direction:column;justify-content:center;gap:16px;min-width:180px}
-.bv-champion{text-align:center;padding:16px;background:rgba(255,214,0,.06);
+  padding:5px 8px;align-self:center;min-width:0}
+.bv-match.bv-done{border-color:rgba(255,255,255,.2)}
+
+/* Equipos */
+.bv-team{display:flex;align-items:center;gap:5px;padding:2px 3px;border-radius:3px;min-width:0}
+.bv-team.bv-loser{opacity:.3;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.4)}
+.bv-team.bv-tbd{opacity:.25;font-style:italic}
+.bv-flag{font-size:13px;flex-shrink:0;line-height:1}
+.bv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px;font-weight:600}
+.bv-score-line{font-size:9px;color:var(--gris);text-align:center;margin-top:2px}
+.bv-dt-line{font-size:8px;color:var(--gris);text-align:center;margin-top:2px}
+
+/* Líneas conectoras SVG-style con borders */
+.bv-conn{position:relative;align-self:stretch}
+/* Línea vertical derecha (sale del match hacia el connector) */
+.bv-conn-right::after{content:'';position:absolute;right:0;top:50%;width:100%;height:1px;
+  background:var(--borde)}
+/* Bracket ─┐ superior */
+.bv-conn-top::after{content:'';position:absolute;right:0;top:50%;bottom:0;width:1px;
+  background:var(--borde)}
+.bv-conn-top::before{content:'';position:absolute;right:0;top:50%;width:100%;height:1px;
+  background:var(--borde)}
+/* Bracket ─┘ inferior */
+.bv-conn-bot::before{content:'';position:absolute;right:0;top:0;bottom:50%;width:1px;
+  background:var(--borde)}
+.bv-conn-bot::after{content:'';position:absolute;right:0;bottom:50%;width:100%;height:1px;
+  background:var(--borde)}
+/* Línea horizontal al siguiente slot */
+.bv-conn-h{position:relative}
+.bv-conn-h::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;
+  background:var(--borde)}
+
+/* Final */
+.bv-final-wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.bv-final-col{display:flex;flex-direction:column;gap:10px;min-width:175px}
+.bv-champion{text-align:center;padding:14px;background:rgba(255,214,0,.06);
   border:1px solid rgba(255,214,0,.3);border-radius:10px}
-.bv-champion-flag{font-size:40px;margin-bottom:6px}
-.bv-champion-name{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--dorado);letter-spacing:1px}
+.bv-champion-flag{font-size:36px;margin-bottom:4px}
+.bv-champion-name{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--dorado);letter-spacing:1px}
 
 /* ── ADMIN TABS ── */
 .admin-tabs{display:flex;gap:0;border-bottom:1px solid var(--borde);margin-bottom:20px}
@@ -499,11 +526,7 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 </head>
 <body>
 
-<!-- ⚠️ BANNER DE ENTORNO DE PRUEBAS -->
-<div style="background:#ff9800;color:#000;text-align:center;padding:8px 12px;font-weight:800;
-  font-size:13px;letter-spacing:.5px;font-family:'Inter',sans-serif;position:sticky;top:0;z-index:9999">
-  🧪 ENTORNO DE PRUEBAS — los datos aquí NO afectan la quiniela real
-</div>
+<div style="background:#ff9800;color:#000;text-align:center;padding:8px;font-weight:800;font-size:13px;font-family:Inter,sans-serif;position:sticky;top:0;z-index:9999">🧪 ENTORNO DE PRUEBAS — no afecta la quiniela real</div>
 
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header>
@@ -531,7 +554,7 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 <!-- ═══════════════════════════════ TABS ═══════════════════════════════ -->
 <div class="tabs">
   <div class="tab active"  onclick="showTab('hoy')">📅 Hoy</div>
-  <div class="tab"         onclick="showTab('bracket')">📊 Bracket</div>
+  <div class="tab"         onclick="showTab('bracket')">⚔️ Duelos</div>
   <div class="tab"         onclick="showTab('grupos')">⚽ Grupos</div>
   <div class="tab"         onclick="showTab('dieciseisavos')">Dieciseisavos</div>
   <div class="tab"         onclick="showTab('octavos')">Octavos</div>
@@ -964,114 +987,190 @@ async function cargarDesdeNube(silent=false){
 // Cada partido de Octavos+ se alinea verticalmente al punto
 // medio exacto de los 2 partidos que lo alimentan (CSS Grid)
 // ══════════════════════════════════════════════════════
+// Bracket helpers
 function bvGetReal(prefix, idx) {
   return resultadosReales[`${prefix}_${idx}`] || null;
 }
-
-function bvWinnerInfo(prefix, idx, teamA, teamB) {
-  const real = bvGetReal(prefix, idx);
-  if (!real) return { done:false, winner:null };
-  const gL = parseInt(real.gL ?? ''), gV = parseInt(real.gV ?? '');
-  if (isNaN(gL) || isNaN(gV)) return { done:false, winner:null };
-  let winner = null;
-  if (gL !== gV) winner = gL > gV ? teamA : teamB;
-  else if (real.ganador) winner = real.ganador;
-  return { done: !!winner, winner, gL, gV, isTie: gL===gV };
+function bvWinner(prefix, idx, tA, tB) {
+  const r = bvGetReal(prefix, idx);
+  if (!r) return {done:false,winner:null};
+  const gL=parseInt(r.gL??''), gV=parseInt(r.gV??'');
+  if (isNaN(gL)||isNaN(gV)) return {done:false,winner:null};
+  const w = gL!==gV ? (gL>gV?tA:tB) : (r.ganador||null);
+  return {done:!!w,winner:w,gL,gV,isTie:gL===gV};
 }
-
-function bvTeamRow(nombre, isWinner, isLoser) {
+function bvRow(nombre, isLoser) {
   if (!nombre) return `<div class="bv-team bv-tbd"><span class="bv-flag">🌍</span><span class="bv-name">Por definir</span></div>`;
-  const cls = isWinner ? ' bv-winner' : (isLoser ? ' bv-loser' : '');
-  return `<div class="bv-team${cls}"><span class="bv-flag">${flagFor(nombre)}</span><span class="bv-name">${nombre}</span></div>`;
+  return `<div class="bv-team${isLoser?' bv-loser':''}"><span class="bv-flag">${flagFor(nombre)}</span><span class="bv-name">${nombre}</span></div>`;
 }
-
-function bvMatchCard(prefix, idx, partido, gridRow) {
-  const tA = partido?.a || null, tB = partido?.b || null;
-  const info = bvWinnerInfo(prefix, idx, tA, tB);
-  const dtLabel = partido?.dt ? fmtDT(partido.dt) : '';
-  const scoreLabel = info.done && info.gL !== undefined
-    ? `<div class="bv-dt" style="color:var(--verde);font-weight:700">${info.gL} - ${info.gV}${info.isTie?' (pen.)':''}</div>`
-    : (dtLabel ? `<div class="bv-dt">${dtLabel}</div>` : '');
-  const rowStyle = gridRow ? `style="grid-row:${gridRow}"` : '';
-  return `<div class="bv-match${info.done?' bv-done':''}" ${rowStyle}>
-    ${bvTeamRow(tA, info.winner===tA, info.done && info.winner!==tA)}
-    ${bvTeamRow(tB, info.winner===tB, info.done && info.winner!==tB)}
-    ${scoreLabel}
+function bvCard(prefix, idx, partido, rowStart, rowSpan) {
+  const tA=partido?.a||null, tB=partido?.b||null;
+  const info=bvWinner(prefix,idx,tA,tB);
+  const dt=partido?.dt?fmtDT(partido.dt):'';
+  const bottom=info.done
+    ?`<div class="bv-score-line">${info.gL} – ${info.gV}${info.isTie?' (pen.)':''}</div>`
+    :(dt?`<div class="bv-dt-line">${dt}</div>`:'');
+  return `<div class="bv-match${info.done?' bv-done':''}" style="grid-column:1;grid-row:${rowStart}/span ${rowSpan};align-self:center">
+    ${bvRow(tA, info.done&&info.winner!==tA)}
+    ${bvRow(tB, info.done&&info.winner!==tB)}
+    ${bottom}
   </div>`;
+}
+// Conectores entre rondas: línea ┐ superior y └ inferior que se unen al centro del partido destino
+function bvConn(topMid, botMid, mid) {
+  return `<div style="grid-column:1;grid-row:${topMid}/${mid};border-right:1px solid rgba(255,255,255,.18);border-bottom:1px solid rgba(255,255,255,.18);border-radius:0 0 5px 0"></div>
+<div style="grid-column:1;grid-row:${mid}/${botMid+1};border-right:1px solid rgba(255,255,255,.18);border-top:1px solid rgba(255,255,255,.18);border-radius:0 5px 0 0"></div>`;
 }
 
 function renderBracketVisual() {
   const div = document.getElementById('bracketVisualContent');
   if (!div) return;
   try {
-    let html = `<div class="bv-wrap">
-      <div class="bv-header">📊 Camino al Título</div>
-      <div class="bv-sub">Vista completa del bracket — la bandera iluminada marca el avance real de cada equipo</div>
+    // Cada ronda tiene su propio grid de una sola columna + separador
+    // rowH = 22px por fila. 8 partidos r32 × 4 filas = 32 filas totales por grupo
+    // Cada partido r32 ocupa filas [pos*4+1 .. pos*4+4], centrado en [pos*4+2 .. pos*4+3]
+    // Octavos: centrado entre fila central del par de r32 que lo alimenta
+    // etc.
+
+    // Orden vertical correcto del bracket (según propagación real)
+    const G = [
+      { num:1, label:'🔵 Grupo 1',
+        r32: [1,3,0,2,6,7,4,5],
+        r16: [0,1,2,3], qf:[0,1], sf:[0] },
+      { num:2, label:'🟢 Grupo 2',
+        r32: [8,9,10,11,13,15,12,14],
+        r16: [4,5,6,7], qf:[2,3], sf:[1] },
+    ];
+
+    // Para N partidos en una ronda, la fila central del partido pos (0-based) es:
+    // center(pos, N) = pos*(32/N) + (32/N)/2  (en filas de 1..32)
+    const center = (pos, N) => Math.round(pos*(32/N) + (32/N)/2);
+    const spanOf = (N) => Math.round(32/N);
+
+    let html = `<div style="padding:0 0 16px">
+      <div class="bv-header">⚔️ Duelos</div>
+      <div class="bv-sub">El equipo tachado quedó eliminado · Scroll horizontal para ver todo</div>
       <div class="bv-groups">`;
 
-    [1, 2].forEach(grupoNum => {
-      const r32idx = BRACKET.r32.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
-      const r16idx = BRACKET.r16.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
-      const qfidx  = BRACKET.qf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
-      const sfidx  = BRACKET.sf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
+    G.forEach(g => {
+      // Build 4 column grids + 3 connector columns
+      // Column structure: [r32|conn|r16|conn|qf|conn|sf]
+      // Each column is a CSS grid with 32 rows of 22px
 
-      // 8 partidos de r32 por grupo → unit base = 2 (filas grid por partido)
-      // r16 (4 partidos) ocupa el doble de espacio centrado → unit = 4
-      // qf (2 partidos) → unit = 8
-      // sf (1 partido) → unit = 16
-      const totalRows = 32; // 8 partidos r32 * 2 filas c/u * 2 (espacio) = base de la rejilla
+      const RH = 22; // px per row
+      const ROWS = 32;
+      const COL_W = 162;
+      const CONN_W = 20;
+
+      // Build columns as HTML strings
+      let colR32='', colC1='', colR16='', colC2='', colQF='', colC3='', colSF='';
+
+      // r32
+      g.r32.forEach((idx,pos) => {
+        const s = center(pos,8) - Math.floor(spanOf(8)/2);
+        colR32 += bvCard('r32', idx, BRACKET.r32[idx], s+1, spanOf(8));
+      });
+
+      // connectors r32→r16
+      for (let pair=0; pair<4; pair++) {
+        const topMid = center(pair*2, 8);
+        const botMid = center(pair*2+1, 8);
+        const mid    = center(pair, 4);
+        colC1 += bvConn(topMid, botMid, mid);
+      }
+
+      // r16
+      g.r16.forEach((idx,pos) => {
+        const s = center(pos,4) - Math.floor(spanOf(4)/2);
+        colR16 += bvCard('r16', idx, BRACKET.r16[idx], s+1, spanOf(4));
+      });
+
+      // connectors r16→qf
+      for (let pair=0; pair<2; pair++) {
+        const topMid = center(pair*2, 4);
+        const botMid = center(pair*2+1, 4);
+        const mid    = center(pair, 2);
+        colC2 += bvConn(topMid, botMid, mid);
+      }
+
+      // qf
+      g.qf.forEach((idx,pos) => {
+        const s = center(pos,2) - Math.floor(spanOf(2)/2);
+        colQF += bvCard('qf', idx, BRACKET.qf[idx], s+1, spanOf(2));
+      });
+
+      // connectors qf→sf
+      {
+        const topMid = center(0, 2);
+        const botMid = center(1, 2);
+        const mid    = center(0, 1);
+        colC3 += bvConn(topMid, botMid, mid);
+      }
+
+      // sf
+      g.sf.forEach((idx,pos) => {
+        const s = center(pos,1) - Math.floor(spanOf(1)/2);
+        colSF += bvCard('sf', idx, BRACKET.sf[idx], s+1, spanOf(1));
+      });
+
+      const gridStyle = `display:grid;grid-template-rows:repeat(${ROWS},${RH}px);`;
 
       html += `<div>
-        <div class="bv-group-label g${grupoNum}">${grupoNum===1?'🔵':'🟢'} Grupo ${grupoNum}</div>
-        <div class="bv-rondas" style="display:grid;grid-template-columns:repeat(4,168px);grid-auto-rows:1fr;column-gap:14px">
-          <div class="bv-ronda-col-grid" style="grid-column:1;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
-            <div class="bv-ronda-title" style="grid-row:1/span 1">Dieciseisavos</div>
-            ${r32idx.map((i,pos) => bvMatchCard('r32', i, BRACKET.r32[i], `${pos*4+2} / span 3`)).join('')}
-          </div>
-          <div class="bv-ronda-col-grid" style="grid-column:2;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
-            <div class="bv-ronda-title" style="grid-row:1/span 1">Octavos</div>
-            ${r16idx.map((i,pos) => bvMatchCard('r16', i, BRACKET.r16[i], `${pos*8+4} / span 5`)).join('')}
-          </div>
-          <div class="bv-ronda-col-grid" style="grid-column:3;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
-            <div class="bv-ronda-title" style="grid-row:1/span 1">Cuartos</div>
-            ${qfidx.map((i,pos) => bvMatchCard('qf', i, BRACKET.qf[i], `${pos*16+8} / span 9`)).join('')}
-          </div>
-          <div class="bv-ronda-col-grid" style="grid-column:4;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
-            <div class="bv-ronda-title" style="grid-row:1/span 1">Semifinal</div>
-            ${sfidx.map((i,pos) => bvMatchCard('sf', i, BRACKET.sf[i], `${pos*32+16} / span 17`)).join('')}
-          </div>
+        <div class="bv-group-label g${g.num}">${g.label}</div>
+        <div style="display:flex;gap:0;min-width:max-content;margin-bottom:4px">
+          <div style="width:${COL_W}px;font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center">Dieciseisavos</div>
+          <div style="width:${CONN_W}px"></div>
+          <div style="width:${COL_W}px;font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center">Octavos</div>
+          <div style="width:${CONN_W}px"></div>
+          <div style="width:${COL_W}px;font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center">Cuartos</div>
+          <div style="width:${CONN_W}px"></div>
+          <div style="width:${COL_W}px;font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center">Semifinal</div>
+        </div>
+        <div style="display:flex;gap:0;min-width:max-content">
+          <div style="width:${COL_W}px;${gridStyle}">${colR32}</div>
+          <div style="width:${CONN_W}px;${gridStyle}">${colC1}</div>
+          <div style="width:${COL_W}px;${gridStyle}">${colR16}</div>
+          <div style="width:${CONN_W}px;${gridStyle}">${colC2}</div>
+          <div style="width:${COL_W}px;${gridStyle}">${colQF}</div>
+          <div style="width:${CONN_W}px;${gridStyle}">${colC3}</div>
+          <div style="width:${COL_W}px;${gridStyle}">${colSF}</div>
         </div>
       </div>`;
     });
 
-    // Final y 3er lugar
-    const finInfo1 = bvWinnerInfo('fin', 1, BRACKET.final[1]?.a, BRACKET.final[1]?.b);
-    const campeonHTML = finInfo1.done
-      ? `<div class="bv-champion">
-          <div class="bv-champion-flag">${flagFor(finInfo1.winner)}</div>
-          <div class="bv-champion-name">🏆 ${finInfo1.winner}</div>
-        </div>`
+    // Fase final
+    const fi = bvWinner('fin', 1, BRACKET.final[1]?.a, BRACKET.final[1]?.b);
+    const champion = fi.done
+      ? `<div class="bv-champion"><div class="bv-champion-flag">${flagFor(fi.winner)}</div><div class="bv-champion-name">🏆 ${fi.winner}</div></div>`
       : '';
 
     html += `<div>
       <div class="bv-group-label" style="color:var(--dorado)">🏆 Fase Final</div>
-      <div class="bv-rondas">
-        <div class="bv-ronda-col">
-          <div class="bv-ronda-title">3er y 4to Lugar</div>
-          ${bvMatchCard('fin', 0, BRACKET.final[0])}
+      <div class="bv-final-wrap">
+        <div class="bv-final-col">
+          <div style="font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center;margin-bottom:4px">3er y 4to Lugar</div>
+          <div class="bv-match${bvWinner('fin',0,BRACKET.final[0]?.a,BRACKET.final[0]?.b).done?' bv-done':''}">
+            ${bvRow(BRACKET.final[0]?.a, bvWinner('fin',0,BRACKET.final[0]?.a,BRACKET.final[0]?.b).done && bvWinner('fin',0,BRACKET.final[0]?.a,BRACKET.final[0]?.b).winner!==BRACKET.final[0]?.a)}
+            ${bvRow(BRACKET.final[0]?.b, bvWinner('fin',0,BRACKET.final[0]?.a,BRACKET.final[0]?.b).done && bvWinner('fin',0,BRACKET.final[0]?.a,BRACKET.final[0]?.b).winner!==BRACKET.final[0]?.b)}
+            ${(()=>{const r=bvGetReal('fin',0);return r&&r.gL!==undefined?`<div class="bv-score-line">${r.gL} – ${r.gV}</div>`:(BRACKET.final[0]?.dt?`<div class="bv-dt-line">${fmtDT(BRACKET.final[0].dt)}</div>`:'');})()}
+          </div>
         </div>
-        <div class="bv-ronda-col">
-          <div class="bv-ronda-title">Gran Final</div>
-          ${bvMatchCard('fin', 1, BRACKET.final[1])}
+        <div class="bv-final-col">
+          <div style="font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center;margin-bottom:4px">Gran Final</div>
+          <div class="bv-match${fi.done?' bv-done':''}">
+            ${bvRow(BRACKET.final[1]?.a, fi.done&&fi.winner!==BRACKET.final[1]?.a)}
+            ${bvRow(BRACKET.final[1]?.b, fi.done&&fi.winner!==BRACKET.final[1]?.b)}
+            ${fi.done?`<div class="bv-score-line">${fi.gL} – ${fi.gV}${fi.isTie?' (pen.)':''}</div>`:(BRACKET.final[1]?.dt?`<div class="bv-dt-line">${fmtDT(BRACKET.final[1].dt)}</div>`:'')}
+          </div>
         </div>
-        ${campeonHTML ? `<div class="bv-final-col">${campeonHTML}</div>` : ''}
+        ${champion}
       </div>
     </div>`;
 
     html += '</div></div>';
     div.innerHTML = html;
   } catch(e) {
-    div.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><p>Error cargando el bracket.<br>${e.message}</p></div>`;
+    div.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><p>Error: ${e.message}</p></div>`;
     console.error('renderBracketVisual error:', e);
   }
 }
