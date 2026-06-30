@@ -412,22 +412,23 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 .bv-wrap{overflow-x:auto;padding-bottom:8px}
 .bv-header{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--dorado);letter-spacing:1px;margin-bottom:4px}
 .bv-sub{font-size:11px;color:var(--gris);margin-bottom:16px}
-.bv-groups{display:flex;flex-direction:column;gap:24px}
+.bv-groups{display:flex;flex-direction:column;gap:28px}
 .bv-group-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
   margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .bv-group-label.g1{color:#448aff}
 .bv-group-label.g2{color:var(--verde)}
 .bv-rondas{display:flex;gap:14px;min-width:max-content}
 .bv-ronda-col{display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-width:168px}
+.bv-ronda-col-grid{min-width:168px;align-content:start}
 .bv-ronda-title{font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;
-  text-align:center;margin-bottom:4px;font-weight:700}
+  text-align:center;margin-bottom:4px;font-weight:700;align-self:center}
 .bv-match{background:var(--panel);border:1px solid var(--borde);border-radius:7px;
-  padding:6px 8px;font-size:11px;transition:all .25s}
+  padding:6px 8px;font-size:11px;transition:all .25s;align-self:center}
 .bv-match.bv-done{border-color:rgba(0,200,83,.3)}
-.bv-team{display:flex;align-items:center;gap:6px;padding:3px 2px;border-radius:4px;transition:all .25s}
-.bv-team.bv-winner{background:rgba(0,200,83,.12);font-weight:700}
-.bv-team.bv-loser{opacity:.4;text-decoration:line-through}
-.bv-team.bv-tbd{opacity:.35;font-style:italic}
+.bv-team{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:4px;transition:all .25s}
+.bv-team.bv-winner{background:rgba(0,200,83,.14);font-weight:700;box-shadow:0 0 0 1px rgba(0,200,83,.25) inset}
+.bv-team.bv-loser{opacity:.32;filter:grayscale(60%)}
+.bv-team.bv-tbd{opacity:.3;font-style:italic}
 .bv-flag{font-size:14px;flex-shrink:0}
 .bv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px}
 .bv-score{font-size:10px;color:var(--gris);font-weight:700;flex-shrink:0}
@@ -959,9 +960,9 @@ async function cargarDesdeNube(silent=false){
 // TABS
 // ══════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════
-// BRACKET VISUAL DINÁMICO — vista pública entre Hoy y Grupos
-// Muestra el camino completo del torneo, resalta ganadores
-// conforme se actualizan los resultados reales en Admin.
+// BRACKET VISUAL DINÁMICO — alineación tipo torneo real
+// Cada partido de Octavos+ se alinea verticalmente al punto
+// medio exacto de los 2 partidos que lo alimentan (CSS Grid)
 // ══════════════════════════════════════════════════════
 function bvGetReal(prefix, idx) {
   return resultadosReales[`${prefix}_${idx}`] || null;
@@ -984,14 +985,15 @@ function bvTeamRow(nombre, isWinner, isLoser) {
   return `<div class="bv-team${cls}"><span class="bv-flag">${flagFor(nombre)}</span><span class="bv-name">${nombre}</span></div>`;
 }
 
-function bvMatchCard(prefix, idx, partido) {
+function bvMatchCard(prefix, idx, partido, gridRow) {
   const tA = partido?.a || null, tB = partido?.b || null;
   const info = bvWinnerInfo(prefix, idx, tA, tB);
   const dtLabel = partido?.dt ? fmtDT(partido.dt) : '';
   const scoreLabel = info.done && info.gL !== undefined
     ? `<div class="bv-dt" style="color:var(--verde);font-weight:700">${info.gL} - ${info.gV}${info.isTie?' (pen.)':''}</div>`
     : (dtLabel ? `<div class="bv-dt">${dtLabel}</div>` : '');
-  return `<div class="bv-match${info.done?' bv-done':''}">
+  const rowStyle = gridRow ? `style="grid-row:${gridRow}"` : '';
+  return `<div class="bv-match${info.done?' bv-done':''}" ${rowStyle}>
     ${bvTeamRow(tA, info.winner===tA, info.done && info.winner!==tA)}
     ${bvTeamRow(tB, info.winner===tB, info.done && info.winner!==tB)}
     ${scoreLabel}
@@ -1004,7 +1006,7 @@ function renderBracketVisual() {
   try {
     let html = `<div class="bv-wrap">
       <div class="bv-header">📊 Camino al Título</div>
-      <div class="bv-sub">Vista completa del bracket — se actualiza automáticamente conforme avanza el torneo</div>
+      <div class="bv-sub">Vista completa del bracket — la bandera iluminada marca el avance real de cada equipo</div>
       <div class="bv-groups">`;
 
     [1, 2].forEach(grupoNum => {
@@ -1013,24 +1015,30 @@ function renderBracketVisual() {
       const qfidx  = BRACKET.qf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
       const sfidx  = BRACKET.sf.map((p,i)=>({p,i})).filter(x => x.p.g === grupoNum).map(x=>x.i);
 
+      // 8 partidos de r32 por grupo → unit base = 2 (filas grid por partido)
+      // r16 (4 partidos) ocupa el doble de espacio centrado → unit = 4
+      // qf (2 partidos) → unit = 8
+      // sf (1 partido) → unit = 16
+      const totalRows = 32; // 8 partidos r32 * 2 filas c/u * 2 (espacio) = base de la rejilla
+
       html += `<div>
         <div class="bv-group-label g${grupoNum}">${grupoNum===1?'🔵':'🟢'} Grupo ${grupoNum}</div>
-        <div class="bv-rondas">
-          <div class="bv-ronda-col">
-            <div class="bv-ronda-title">Dieciseisavos</div>
-            ${r32idx.map(i => bvMatchCard('r32', i, BRACKET.r32[i])).join('')}
+        <div class="bv-rondas" style="display:grid;grid-template-columns:repeat(4,168px);grid-auto-rows:1fr;column-gap:14px">
+          <div class="bv-ronda-col-grid" style="grid-column:1;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
+            <div class="bv-ronda-title" style="grid-row:1/span 1">Dieciseisavos</div>
+            ${r32idx.map((i,pos) => bvMatchCard('r32', i, BRACKET.r32[i], `${pos*4+2} / span 3`)).join('')}
           </div>
-          <div class="bv-ronda-col">
-            <div class="bv-ronda-title">Octavos</div>
-            ${r16idx.map(i => bvMatchCard('r16', i, BRACKET.r16[i])).join('')}
+          <div class="bv-ronda-col-grid" style="grid-column:2;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
+            <div class="bv-ronda-title" style="grid-row:1/span 1">Octavos</div>
+            ${r16idx.map((i,pos) => bvMatchCard('r16', i, BRACKET.r16[i], `${pos*8+4} / span 5`)).join('')}
           </div>
-          <div class="bv-ronda-col">
-            <div class="bv-ronda-title">Cuartos</div>
-            ${qfidx.map(i => bvMatchCard('qf', i, BRACKET.qf[i])).join('')}
+          <div class="bv-ronda-col-grid" style="grid-column:3;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
+            <div class="bv-ronda-title" style="grid-row:1/span 1">Cuartos</div>
+            ${qfidx.map((i,pos) => bvMatchCard('qf', i, BRACKET.qf[i], `${pos*16+8} / span 9`)).join('')}
           </div>
-          <div class="bv-ronda-col">
-            <div class="bv-ronda-title">Semifinal</div>
-            ${sfidx.map(i => bvMatchCard('sf', i, BRACKET.sf[i])).join('')}
+          <div class="bv-ronda-col-grid" style="grid-column:4;display:grid;grid-template-rows:repeat(${totalRows},auto);row-gap:6px">
+            <div class="bv-ronda-title" style="grid-row:1/span 1">Semifinal</div>
+            ${sfidx.map((i,pos) => bvMatchCard('sf', i, BRACKET.sf[i], `${pos*32+16} / span 17`)).join('')}
           </div>
         </div>
       </div>`;
@@ -1389,7 +1397,9 @@ function renderRondaElim(gridId, partidos, prefix) {
 
     const card = document.createElement('div');
     card.className = 'partido-card' + (locked ? ' locked' : '');
-    card.style.borderColor = p.g ? (p.g===1 ? 'rgba(68,138,255,.2)' : 'rgba(0,200,83,.15)') : '';
+    if (!locked) {
+      card.style.borderColor = p.g ? (p.g===1 ? 'rgba(68,138,255,.2)' : 'rgba(0,200,83,.15)') : '';
+    }
 
     card.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
@@ -2203,18 +2213,20 @@ function renderResultadosAdmin() {
       }
     }
   });
+
+  // Marco dorado: lo que viene de Firebase YA está guardado/confirmado
+  marcarResultadosGuardados();
 }
 
 // setResultadoReal para eliminatorias — muestra/oculta penales dinámicamente
 function setResultadoRealElim(key, field, val, tA, tB) {
   setResultadoReal(key, field, val);
 
-  // Marco dorado inmediato en el input que se acaba de llenar (igual que en Grupos)
+  // Quitar marco dorado al editar — solo vuelve a aparecer tras Guardar confirmado
   const row = document.getElementById(`rp_${key}`);
   if (row) {
     const inputs = row.querySelectorAll('.real-score-input');
-    if (inputs[0]) inputs[0].style.borderColor = (resultadosReales[key]?.gL ?? '') !== '' ? 'var(--dorado)' : 'var(--borde)';
-    if (inputs[1]) inputs[1].style.borderColor = (resultadosReales[key]?.gV ?? '') !== '' ? 'var(--dorado)' : 'var(--borde)';
+    inputs.forEach(inp => inp.style.borderColor = 'var(--borde)');
   }
 
   // Check if tie after updating
@@ -2241,9 +2253,25 @@ function setResultadoRealElim(key, field, val, tA, tB) {
 function setResultadoReal(key, field, val) {
   if (!resultadosReales[key]) resultadosReales[key] = {};
   resultadosReales[key][field] = val;
-  // Visual feedback — marca el campo como modificado
+  // Visual feedback — marca el campo como modificado (naranja = sin guardar)
   const btn = document.getElementById('btnGuardarResultados');
   if (btn) { btn.textContent = '💾 Guardar resultados *'; btn.style.background = '#ff9800'; btn.style.color='#000'; }
+  // Quitar marco dorado del input de Grupos también — vuelve hasta confirmar Guardar
+  const inputEl = document.querySelector(`[oninput*="'${key}'"][oninput*="'${field}'"]`);
+  if (inputEl) inputEl.style.borderColor = 'var(--borde)';
+}
+
+// Marca con dorado SOLO los campos que ya están confirmados en Firebase
+// (se llama después de un guardado exitoso)
+function marcarResultadosGuardados() {
+  document.querySelectorAll('.real-score-input').forEach(inp => {
+    const onInput = inp.getAttribute('oninput') || '';
+    const m = onInput.match(/^set\w+\('([^']+)','([^']+)'/);
+    if (!m) return;
+    const [, key, field] = m;
+    const val = resultadosReales[key]?.[field];
+    inp.style.borderColor = (val !== undefined && val !== '') ? 'var(--dorado)' : 'var(--borde)';
+  });
 }
 
 
@@ -2427,6 +2455,7 @@ async function guardarResultadosManual() {
   try {
     await window._fb.guardarResultados(resultadosReales);
     await propagarBracket(); // auto-propagar ganadores al siguiente slot
+    marcarResultadosGuardados(); // marco dorado SOLO en lo confirmado
     if (btn) { btn.textContent = '✅ Guardado'; btn.style.background='var(--verde)'; btn.style.color='#000'; btn.disabled = false; }
     setTimeout(() => {
       if (btn) { btn.textContent = '💾 Guardar resultados'; btn.style.background='var(--verde)'; }
