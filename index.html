@@ -11,21 +11,17 @@
   import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ─── FIREBASE CONFIG ────────────────────────────────────────────
-  // INSTRUCCIONES PARA MAURICIO:
-  // 1. Ve a https://console.firebase.google.com
-  // 2. Crea proyecto "quiniela-rodriguez-2026"
-  // 3. Firestore Database → Crear en modo prueba
-  // 4. Configuración del proyecto → Agregar app web
-  // 5. Copia tu firebaseConfig y pégalo aquí abajo:
+  // ─── FIREBASE CONFIG — ⚠️ ENTORNO DE PRUEBAS (TEST) ──────────────
+  // Este archivo apunta al proyecto quiniela-rodriguez-test,
+  // separado por completo de la base real (quiniela-rodriguez-2026).
+  // Úsalo libremente para probar cambios sin afectar el juego real.
   const firebaseConfig = {
-    apiKey: "AIzaSyCeeZL8RlxrXLPBg6hByXxI9ZEyFajPY1w",
-    authDomain: "quiniela-rodriguez-2026.firebaseapp.com",
-    projectId: "quiniela-rodriguez-2026",
-    storageBucket: "quiniela-rodriguez-2026.firebasestorage.app",
-    messagingSenderId: "1077314022638",
-    appId: "1:1077314022638:web:728b34388dbc7aa48f17ff",
-    measurementId: "G-C9BVX6SYZW"
+    apiKey: "AIzaSyB2uTjQVzhN1QWJV9D3bwJ_VQQvVsE6BdU",
+    authDomain: "quiniela-rodriguez-test.firebaseapp.com",
+    projectId: "quiniela-rodriguez-test",
+    storageBucket: "quiniela-rodriguez-test.firebasestorage.app",
+    messagingSenderId: "831116749397",
+    appId: "1:831116749397:web:c3c7098b6834b0aa1a42dc"
   };
   // ────────────────────────────────────────────────────────────────
 
@@ -465,6 +461,12 @@ header{background:var(--carbon);border-bottom:2px solid var(--verde);padding:14p
 </style>
 </head>
 <body>
+
+<!-- ⚠️ BANNER DE ENTORNO DE PRUEBAS — visible siempre para no confundir con producción -->
+<div style="background:#ff9800;color:#000;text-align:center;padding:8px 12px;font-weight:800;
+  font-size:13px;letter-spacing:.5px;font-family:'Inter',sans-serif;position:sticky;top:0;z-index:9999">
+  🧪 ENTORNO DE PRUEBAS — los datos aquí NO afectan la quiniela real
+</div>
 
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header>
