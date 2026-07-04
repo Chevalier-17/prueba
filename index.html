@@ -2707,10 +2707,17 @@ async function renderPuntos() {
   }
 }
 
-// Load resultados on fb-ready
-document.addEventListener('fb-ready', () => {
-  cargarResultadosReales();
-  cargarBracketDesdeNube();
+// Load resultados on fb-ready, luego cargar quiniela del participante y re-renderizar Hoy
+document.addEventListener('fb-ready', async () => {
+  await cargarResultadosReales();
+  await cargarBracketDesdeNube();
+  // Si ya hay un participante seleccionado (de localStorage), cargar su quiniela
+  // y re-renderizar Hoy con los datos reales
+  const nombre = document.getElementById('participanteInput').value.trim();
+  if (nombre) {
+    await cargarDesdeNube(true); // silencioso — actualiza state y re-renderiza
+  }
+  renderHoy(); // re-renderizar con datos frescos (resultados + quiniela cargada)
 });
 
 
@@ -2976,8 +2983,9 @@ function updateHeaderHeight() {
 updateHeaderHeight();
 window.addEventListener('resize', updateHeaderHeight);
 
-// Start on HOY tab
+// Start on HOY tab — renderHoy se hace DESPUÉS de cargar quiniela (ver fb-ready)
 showTab('hoy');
+// Mostrar estructura vacía inmediata, se llenará cuando cargue Firebase
 renderHoy();
 
 // ── AUTO-REFRESH ──
